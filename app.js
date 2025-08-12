@@ -225,9 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 scores: {}
             }).then(() => {
                 showView(shareSection);
-                const quizLink = `${window.location.origin}/?id=${newQuizId}`;
+                const quizLink = `${window.location.href.split('?')[0]}?id=${newQuizId}`;
                 document.getElementById('share-link').value = quizLink;
-                document.getElementById('view-results-link').href = `/?id=${newQuizId}&view=scoreboard`;
+                document.getElementById('view-results-link').href = `?id=${newQuizId}&view=scoreboard`;
             });
         }
     });
