@@ -212,6 +212,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } else {
             // Creator submitting the quiz
+            // Update the 'correctAnswer' for each question with the creator's answer
+            currentQuizQuestions.forEach((question, index) => {
+                question.correctAnswer = creatorAnswers[index];
+            });
+
             const newQuizId = generateQuizID();
             const creatorName = creatorNameInput.value.trim();
             database.ref(`quizzes/${newQuizId}`).set({
