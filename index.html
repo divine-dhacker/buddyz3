@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz App</title>
+    <!-- Google Fonts for a modern look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    
+    <style>
+      :root {
+        --primary-color: #ff527b;
+        --secondary-color: #00f2fe;
+        --bg-color: #121212;
+        --card-bg: #1e1e1e;
+        --text-color: #e0e0e0;
+        --light-text-color: #a0a0a0;
+        --border-color: #333;
+      }
+
+      body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 1rem;
+      }
+
+      /* Navbar & Hamburger Menu */
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        position: relative;
+      }
+
+      .logo {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--primary-color);
+      }
+
+      .menu-toggle {
+        display: none;
+      }
+
+      .hamburger-menu {
+        display: block;
+        cursor: pointer;
+        z-index: 20;
+      }
+
+      .hamburger-menu i {
+        font-size: 1.5rem;
+        color: var(--text-color);
+      }
+
+      .nav-links {
+        display: none;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: var(--card-bg);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        z-index: 10;
+        flex-direction: column;
+        text-align: center;
+        border: 1px solid var(--border-color);
+        transform: translateY(10px);
+      }
+
+      .nav-links li a {
+        display: block;
+        padding: 1rem;
+        text-decoration: none;
+        color: var(--text-color);
+        border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.3s;
+      }
+
+      .nav-links li:last-child a {
+        border-bottom: none;
+      }
+
+      .nav-links li a:hover {
+        background-color: var(--border-color);
+      }
+
+      .menu-toggle:checked ~ .nav-links {
+        display: flex;
+      }
+
+      /* Hero Section */
+      .hero-section {
+        text-align: center;
+        padding: 2rem 1rem;
+        background: linear-gradient(to bottom, var(--card-bg), transparent);
+        border-radius: 12px;
+        margin-bottom: 2rem;
+      }
+
+      .hero-section h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 700;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+      }
+
+      .hero-section p {
+        font-size: 1rem;
+        color: var(--light-text-color);
+        margin: 1rem auto 2rem;
+        max-width: 500px;
+      }
+
+      /* General Card and Sections */
+      section {
+        margin-bottom: 2rem;
+      }
+
+      .card {
+        background-color: var(--card-bg);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border-color);
+      }
+
+      .section-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+      }
+
+      .section-title i {
+        color: var(--secondary-color);
+        font-size: 1.5rem;
+      }
+
+      .section-description {
+        font-size: 1rem;
+        color: var(--light-text-color);
+        margin-bottom: 1.5rem;
+      }
+
+      /* Buttons */
+      .btn {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        border-radius: 8px;
+        border: none;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition: background-color 0.3s, transform 0.2s;
+        background-color: var(--primary-color);
+        color: #fff;
+      }
+
+      .btn:hover {
+        background-color: #ff7299;
+        transform: translateY(-2px);
+      }
+
+      .primary-btn {
+        background: linear-gradient(45deg, var(--primary-color), #ff4d6a);
+        border: none;
+      }
+
+      /* Form Styling */
+      input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        box-sizing: border-box;
+      }
+
+      /* Spotlight/How it Works Section */
+      .spotlight-card {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .spotlight-item {
+        text-align: center;
+      }
+
+      .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: var(--border-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.8rem;
+        margin: 0 auto 1rem;
+        color: var(--primary-color);
+      }
+
+      .spotlight-item h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--secondary-color);
+        margin: 0;
+      }
+
+      .spotlight-item p {
+        font-size: 0.9rem;
+        color: var(--light-text-color);
+      }
+
+      /* Topics Section */
+      .topics-section {
+        text-align: center;
+      }
+
+      .topic-grid {
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      }
+
+      .topic-card {
+        background-color: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border-color);
+        text-align: left;
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .topic-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .topic-card h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+      }
+
+      .topic-card p {
+        font-size: 0.9rem;
+        color: var(--light-text-color);
+        margin: 0;
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+        margin-top: 2rem;
+        color: var(--light-text-color);
+      }
+
+      /* Media Queries for responsiveness */
+      @media (min-width: 600px) {
+        .spotlight-card {
+          flex-direction: row;
+          justify-content: space-between;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="navbar">
+        <input type="checkbox" id="menu-toggle" class="menu-toggle" />
+        <label for="menu-toggle" class="hamburger-menu">
+          <i class="fa-solid fa-bars"></i>
+        </label>
+        <div class="logo">Buddyz</div>
+        <ul class="nav-links">
+          <li><a href="#">Home</a></li>
+          <li><a href="#">Create Quiz</a></li>
+          <li><a href="#">My Quizzes</a></li>
+          <li><a href="#">Help</a></li>
+        </ul>
+      </nav>
+
+      <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+          <h1>Forge Deeper Bonds.</h1>
+          <p>
+            Dive into the world of friendship quizzes and discover how well your friends truly know you. It's the ultimate test of your bond.
+          </p>
+          <a href="#create-quiz" class="btn primary-btn">Start the Challenge</a>
+        </section>
+
+        <!-- Create Quiz Section -->
+        <section class="card" id="create-quiz">
+          <h2 class="section-title">
+            <i class="fa-solid fa-magic"></i> Craft Your Quiz
+          </h2>
+          <p class="section-description">
+            Create a unique set of questions that only your true friends would know the answers to.
+          </p>
+          <form id="create-form">
+            <input type="text" id="creator-name" placeholder="Enter your name" required />
+            <button type="submit" class="btn">Start Quiz</button>
+          </form>
+        </section>
+
+        <!-- Spotlight/How it Works Section -->
+        <section class="card spotlight-card">
+          <div class="spotlight-item">
+            <i class="fa-solid fa-lightbulb icon-circle"></i>
+            <h3>The Concept</h3>
+            <p>
+              It's simple. You set the rules, your friends answer, and the score reveals all. A fun and insightful way to test your connection.
+            </p>
+          </div>
+          <div class="spotlight-item">
+            <i class="fa-solid fa-users icon-circle"></i>
+            <h3>The Audience</h3>
+            <p>
+              Share your quiz with a select few or your entire social circle. See if your best friends really stand out from the crowd.
+            </p>
+          </div>
+          <div class="spotlight-item">
+            <i class="fa-solid fa-chart-line icon-circle"></i>
+            <h3>The Scoreboard</h3>
+            <p>
+              A real-time leaderboard shows who knows you best, with the highest scores at the top. Bragging rights are earned here.
+            </p>
+          </div>
+        </section>
+
+        <!-- Long Topics Section -->
+        <section class="topics-section">
+          <h2 class="section-title">
+            <i class="fa-solid fa-star"></i> Featured Quizzes
+          </h2>
+          <p class="section-description">
+            Explore a wide variety of quiz topics to get inspired for your own.
+          </p>
+          <div class="topic-grid">
+            <div class="topic-card">
+              <h3>Movies & Shows</h3>
+              <p>Find out who pays attention to your taste in cinema and TV series.</p>
+            </div>
+            <div class="topic-card">
+              <h3>Food & Cravings</h3>
+              <p>Do they know your go-to snack, restaurant, or secret craving?</p>
+            </div>
+            <div class="topic-card">
+              <h3>Travel Memories</h3>
+              <p>Test their knowledge of your favorite destinations and travel stories.</p>
+            </div>
+            <div class="topic-card">
+              <h3>Music & Artists</h3>
+              <p>From your favorite genre to that one song on repeat, how well do they know your playlist?</p>
+            </div>
+            <div class="topic-card">
+              <h3>Childhood Trivia</h3>
+              <p>Can they guess what you were like as a kid or your favorite childhood memory?</p>
+            </div>
+            <div class="topic-card">
+              <h3>Hobbies & Habits</h3>
+              <p>A true friend knows what you do for fun and what your daily routines are.</p>
+            </div>
+            <div class="topic-card">
+              <h3>Personalities & Traits</h3>
+              <p>Is your best friend a mind reader? Let's find out.</p>
+            </div>
+            <div class="topic-card">
+              <h3>Future Dreams</h3>
+              <p>Do they remember your wildest dreams and future plans?</p>
+            </div>
+            <div class="topic-card">
+              <h3>Gaming Preferences</h3>
+              <p>From console choice to favorite game, this one is for the gamers.</p>
+            </div>
+            <div class="topic-card">
+              <h3>Random Fun Facts</h3>
+              <p>A collection of quirky and random questions about you.</p>
+            </div>
+            <div class="topic-card">
+              <h3>Sports & Teams</h3>
+              <p>Find out if your friends know who you root for on game day.</p>
+            </div>
+            <div class="topic-card">
+              <h3>Pop Culture</h3>
+              <p>A fun way to see if they're caught up on the latest trends and celebrity gossip.</p>
+            </div>
+            <div class="topic-card">
+              <h3>Books & Literature</h3>
+              <p>Who knows your favorite author or the book you can't put down?</p>
+            </div>
+            <div class="topic-card">
+              <h3>Pet's Life</h3>
+              <p>For those with furry, scaly, or feathered friends. Do they know your pet's name?</p>
+            </div>
+            <div class="topic-card">
+              <h3>Dream Vacation</h3>
+              <p>Can they guess your perfect getaway, whether it's a beach or a mountain retreat?</p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <p>&copy; 2024 Buddyz. All rights reserved.</p>
+      </footer>
+    </div>
+    
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
+
