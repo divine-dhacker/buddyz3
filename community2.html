@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Buddyz — Community</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0f1113;
+      --card: #121416;
+      --muted: #9aa0a6;
+      --accent: #ff2d2d;
+      --glass: rgba(255, 255, 255, 0.03);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: #eee;
+      margin: 0;
+      min-height: 100vh;
+    }
+    .app {
+      max-width: 980px;
+      margin: 20px auto;
+      padding: 16px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+    /* Stories carousel */
+    .stories {
+      display: flex;
+      overflow-x: auto;
+      padding: 8px 2px;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .story {
+      min-width: 100px;
+      height: 130px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 8px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .story:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    .story .avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #222, #111);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(255, 255, 255, 0.03);
+    }
+    .story .story-name {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 100%;
+    }
+    /* Post Modal - Full screen story view */
+    .post-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .post-modal.open {
+      display: flex;
+    }
+    .post-content {
+      width: 100%;
+      height: 100%;
+      padding: 20px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .post-content .post-header {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .post-content .post-header .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .post-content .post-header .user-info .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .post-content .post-header .user-info .name {
+      font-weight: 600;
+      font-size: 16px;
+    }
+    .post-content .post-header .close-btn {
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .post-content .post-media {
+      max-width: 90%;
+      max-height: 70vh;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .post-content .post-text {
+      font-size: 24px;
+      font-weight: 600;
+      margin-top: 20px;
+    }
+    .post-actions {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .post-actions .btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .post-actions .btn.liked {
+        color: var(--accent);
+    }
+    .post-actions .comment-input {
+      flex: 1;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 20px;
+    }
+    .post-actions .comment-submit {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    /* Composer modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
+    }
+    .modal.open {
+      display: flex;
+    }
+    .composer {
+      width: 420px;
+      background: var(--card);
+      padding: 16px;
+      border-radius: 12px;
+    }
+    .composer textarea {
+      width: 100%;
+      height: 90px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      color: #eee;
+      padding: 8px;
+      border-radius: 8px;
+      resize: none;
+      margin-bottom: 8px;
+    }
+    .composer input[type="text"], .composer input[type="file"] {
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      color: #eee;
+      padding: 8px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .composer .row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .fab {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      cursor: pointer;
+    }
+    /* Poll styling */
+    .poll-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    .poll-option-btn {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: #fff;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        position: relative;
+        text-align: center;
+    }
+    .poll-option-btn .poll-progress {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background: rgba(255,255,255,0.2);
+        transition: width 0.5s ease-in-out;
+        border-radius: 8px;
+        z-index: 0;
+    }
+    .poll-option-btn span {
+        position: relative;
+        z-index: 1;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* New Viewer List Modal */
+    .viewer-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 200;
+    }
+    .viewer-modal-content {
+        background: var(--card);
+        padding: 20px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 400px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    .viewer-modal-content h3 {
+        margin-top: 0;
+    }
+    .viewer-list li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .viewer-list li:last-child {
+        border-bottom: none;
+    }
+    .viewer-list .avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+    @media(max-width: 520px){
+      .composer{width:92vw}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Buddyz — Community</h1>
+    </header>
+    <section class="stories" id="stories"></section>
+    <button class="fab" id="openComposer"><i class="fas fa-plus"></i></button>
+  </div>
+  
+  <div class="post-modal" id="postModal">
+    <div class="post-content" id="postContent">
+      <div class="post-header">
+        <div class="user-info">
+          <div class="avatar" id="postAvatar"></div>
+          <div>
+            <div class="name" id="postAuthor"></div>
+            <div class="small" id="postTimestamp"></div>
+          </div>
+        </div>
+        <i class="fas fa-times close-btn" id="closePostModal"></i>
+      </div>
+      <div id="mainPostContent"></div>
+      <div class="post-actions">
+        <input type="text" class="comment-input" id="commentInput" placeholder="Reply...">
+        <button class="btn" id="likeBtn"><i class="fas fa-heart"></i> <span id="likeCount">0</span></button>
+        <button class="btn" id="commentSubmit"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="composer">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <strong>Create Post</strong>
+        <button class="btn" id="closeComposer"><i class="fas fa-times"></i></button>
+      </div>
+      <input type="text" id="authorName" placeholder="Your Name" required>
+      <textarea id="caption" placeholder="Say something..."></textarea>
+      <div class="row">
+        <label class="btn"><i class="fas fa-image"></i> Attach Image<input type="file" id="imageInput" multiple></label>
+        <button class="btn" id="makePollBtn"><i class="fas fa-poll-h"></i> Create Poll</button>
+        <div style="flex:1"></div>
+        <button class="btn" id="submitPost"><i class="fas fa-paper-plane"></i> Post</button>
+      </div>
+      <div id="pollOptionsContainer" style="display: none; margin-top: 10px;">
+        <input type="text" class="poll-option-input" placeholder="Option 1">
+        <input type="text" class="poll-option-input" placeholder="Option 2">
+        <button class="btn" id="addPollOption">Add Option</button>
+      </div>
+      <div class="small" id="uploaderStatus"></div>
+    </div>
+  </div>
+
+  <div class="viewer-modal" id="viewerModal">
+    <div class="viewer-modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>Viewers</h3>
+            <i class="fas fa-times close-btn" id="closeViewerModal"></i>
+        </div>
+        <ul id="viewerList" class="viewer-list" style="list-style: none; padding: 0;"></ul>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAVR8OxIwbMkasKfjTVQOpi69Ikw6LraSo",
+      authDomain: "buddy-ea6cd.firebaseapp.com",
+      databaseURL: "https://buddy-ea6cd-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "buddy-ea6cd",
+      storageBucket: "buddy-ea6cd.appspot.com",
+      messagingSenderId: "947901635950",
+      appId: "1:947901635950:web:dd11c3a278eb18768e357f"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const storage = firebase.storage();
+    let currentUser = null;
+    let localUserId = localStorage.getItem('localUserId');
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        if (!localUserId) {
+          localUserId = user.uid;
+          localStorage.setItem('localUserId', localUserId);
+        }
+        updateStories();
+      } else {
+        firebase.auth().signInAnonymously().catch(err => console.error("Auth error:", err));
+      }
+    });
+
+    const storiesEl = document.getElementById('stories');
+    const modal = document.getElementById('modal');
+    const openComposer = document.getElementById('openComposer');
+    const closeComposer = document.getElementById('closeComposer');
+    const authorNameInput = document.getElementById('authorName');
+    const caption = document.getElementById('caption');
+    const imageInput = document.getElementById('imageInput');
+    const submitPost = document.getElementById('submitPost');
+    const uploaderStatus = document.getElementById('uploaderStatus');
+    const postModal = document.getElementById('postModal');
+    const mainPostContent = document.getElementById('mainPostContent');
+    const postAuthorEl = document.getElementById('postAuthor');
+    const postTimestampEl = document.getElementById('postTimestamp');
+    const postAvatarEl = document.getElementById('postAvatar');
+    const closePostModal = document.getElementById('closePostModal');
+    const likeBtn = document.getElementById('likeBtn');
+    const likeCountEl = document.getElementById('likeCount');
+    const commentInput = document.getElementById('commentInput');
+    const commentSubmit = document.getElementById('commentSubmit');
+    const makePollBtn = document.getElementById('makePollBtn');
+    const pollOptionsContainer = document.getElementById('pollOptionsContainer');
+    const addPollOptionBtn = document.getElementById('addPollOption');
+    const viewerModal = document.getElementById('viewerModal');
+    const closeViewerModal = document.getElementById('closeViewerModal');
+    const viewerList = document.getElementById('viewerList');
+    
+    let currentPostId = null;
+
+    openComposer.addEventListener('click', () => modal.classList.add('open'));
+    closeComposer.addEventListener('click', () => modal.classList.remove('open'));
+    closePostModal.addEventListener('click', () => postModal.classList.remove('open'));
+    closeViewerModal.addEventListener('click', () => viewerModal.style.display = 'none');
+
+    let isCreatingPoll = false;
+    makePollBtn.addEventListener('click', () => {
+        isCreatingPoll = !isCreatingPoll;
+        pollOptionsContainer.style.display = isCreatingPoll ? 'block' : 'none';
+    });
+    addPollOptionBtn.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'poll-option-input';
+        input.placeholder = `Option ${pollOptionsContainer.querySelectorAll('.poll-option-input').length + 1}`;
+        pollOptionsContainer.insertBefore(input, addPollOptionBtn);
+    });
+
+    let selectedImageFiles = [];
+    imageInput.addEventListener('change', (e) => {
+      selectedImageFiles = Array.from(e.target.files);
+      if (selectedImageFiles.length > 0) {
+        uploaderStatus.textContent = `${selectedImageFiles.length} file(s) selected`;
+      } else {
+        uploaderStatus.textContent = '';
+      }
+    });
+
+    submitPost.addEventListener('click', async () => {
+        const author = authorNameInput.value.trim();
+        const text = caption.value.trim();
+        if (!author) {
+            alert("Please enter your name!");
+            return;
+        }
+
+        const uid = currentUser ? currentUser.uid : 'anon';
+        const post = {
+            author: author,
+            authorId: uid,
+            caption: text || '',
+            likes: 0,
+            timestamp: Date.now(),
+        };
+
+        if (isCreatingPoll) {
+            const pollOptions = Array.from(pollOptionsContainer.querySelectorAll('.poll-option-input'))
+                                    .map(input => input.value.trim())
+                                    .filter(val => val !== '');
+            if (pollOptions.length < 2) {
+                alert("Please provide at least two poll options.");
+                return;
+            }
+            post.type = 'poll';
+            post.poll = pollOptions.reduce((acc, option) => ({ ...acc, [option]: 0 }), {});
+        } else if (selectedImageFiles.length > 0) {
+            post.type = 'images';
+            post.content = [];
+            uploaderStatus.textContent = `Uploading ${selectedImageFiles.length} file(s)...`;
+            for (const file of selectedImageFiles) {
+                const path = `posts_images/${uid}_${Date.now()}_${file.name}`;
+                const snap = await storage.ref(path).put(file);
+                const url = await snap.ref.getDownloadURL();
+                post.content.push(url);
+            }
+            uploaderStatus.textContent = 'Upload complete.';
+        } else {
+            post.type = 'text';
+        }
+
+        await db.ref('posts').push(post);
+        modal.classList.remove('open');
+        authorNameInput.value = '';
+        caption.value = '';
+        imageInput.value = '';
+        selectedImageFiles = [];
+        uploaderStatus.textContent = '';
+        isCreatingPoll = false;
+        pollOptionsContainer.innerHTML = `<input type="text" class="poll-option-input" placeholder="Option 1"><input type="text" class="poll-option-input" placeholder="Option 2"><button class="btn" id="addPollOption">Add Option</button>`;
+        pollOptionsContainer.style.display = 'none';
+        updateStories();
+    });
+
+    function timeAgo(ts) {
+        const seconds = Math.floor((Date.now() - ts) / 1000);
+        if (seconds < 60) return `${seconds}s`;
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h`;
+        const days = Math.floor(hours / 24);
+        return `${days}d`;
+    }
+
+    function showPost(post) {
+        currentPostId = post.id;
+        postAuthorEl.textContent = post.author || 'Anonymous';
+        postTimestampEl.textContent = timeAgo(post.timestamp);
+        postAvatarEl.textContent = (post.author || 'A').charAt(0).toUpperCase();
+        
+        // Track view
+        if (currentUser && currentUser.uid !== post.authorId) {
+            db.ref(`postViews/${post.id}/${currentUser.uid}`).set(true);
+        }
+
+        mainPostContent.innerHTML = '';
+        let contentHtml = '';
+
+        if (post.type === 'images' && Array.isArray(post.content)) {
+            contentHtml = post.content.map(url => `<img class="post-media" src="${url}" alt="Post image">`).join('');
+        } else if (post.type === 'text') {
+            contentHtml = `<p class="post-text">${post.caption || ''}</p>`;
+        } else if (post.type === 'poll') {
+            const totalVotes = Object.values(post.poll || {}).reduce((sum, votes) => sum + votes, 0);
+            contentHtml = `<p class="post-text">${post.caption || ''}</p><div class="poll-options">`;
+            for (const option in post.poll) {
+                const votePercentage = totalVotes > 0 ? (post.poll[option] / totalVotes) * 100 : 0;
+                contentHtml += `<button class="poll-option-btn" data-option="${option}">
+                                  <div class="poll-progress" style="width:${votePercentage}%"></div>
+                                  <span>${option} (${post.poll[option]})</span>
+                                </button>`;
+            }
+            contentHtml += `</div>`;
+        }
+        mainPostContent.innerHTML = contentHtml;
+        
+        postModal.classList.add('open');
+        
+        // Update like button state and count
+        const likeCountRef = db.ref(`posts/${post.id}/likes`);
+        likeCountRef.on('value', snap => {
+            const count = snap.val() || 0;
+            likeCountEl.textContent = count;
+        });
+
+        const userLikeRef = db.ref(`postLikes/${post.id}/${currentUser.uid}`);
+        userLikeRef.on('value', snap => {
+            if (snap.exists()) {
+                likeBtn.classList.add('liked');
+            } else {
+                likeBtn.classList.remove('liked');
+            }
+        });
+
+        likeBtn.onclick = () => toggleLike(post.id);
+        commentSubmit.onclick = () => addComment(post.id, commentInput.value);
+        
+        if (post.type === 'poll') {
+            document.querySelectorAll('.poll-option-btn').forEach(button => {
+                button.onclick = () => voteOnPoll(post.id, button.dataset.option);
+            });
+        }
+        
+        // Show viewers button if it's the creator's post
+        if (currentUser && currentUser.uid === post.authorId) {
+            const viewersButton = document.createElement('button');
+            viewersButton.className = 'btn';
+            viewersButton.innerHTML = `<i class="fas fa-eye"></i> Viewers`;
+            viewersButton.style.position = 'absolute';
+            viewersButton.style.top = '70px';
+            viewersButton.style.right = '20px';
+            viewersButton.onclick = () => showViewers(post.id);
+            document.getElementById('postContent').appendChild(viewersButton);
+        }
+    }
+    
+    function showViewers(postId) {
+        viewerList.innerHTML = '';
+        const viewersRef = db.ref(`postViews/${postId}`);
+        viewersRef.once('value', snapshot => {
+            const viewerIds = snapshot.val() ? Object.keys(snapshot.val()) : [];
+            if (viewerIds.length === 0) {
+                viewerList.innerHTML = '<li>No one has viewed this post yet.</li>';
+            } else {
+                viewerIds.forEach(id => {
+                    // In a real app, you would fetch user data here.
+                    const viewerItem = document.createElement('li');
+                    viewerItem.innerHTML = `<div class="avatar">${id.charAt(0).toUpperCase()}</div><span>User: ${id.substring(0, 5)}...</span>`;
+                    viewerList.appendChild(viewerItem);
+                });
+            }
+            viewerModal.style.display = 'flex';
+        });
+    }
+
+    function toggleLike(postId) {
+        if (!currentUser) return;
+        const userLikeRef = db.ref(`postLikes/${postId}/${currentUser.uid}`);
+        const likesRef = db.ref(`posts/${postId}/likes`);
+        userLikeRef.once('value').then(snapshot => {
+            if (snapshot.exists()) {
+                userLikeRef.remove();
+                likesRef.transaction(current => (current || 1) - 1);
+            } else {
+                userLikeRef.set(true);
+                likesRef.transaction(current => (current || 0) + 1);
+            }
+        });
+    }
+
+    function addComment(postId, commentText) {
+        if (!commentText.trim()) return;
+        const author = authorNameInput.value.trim() || 'Anonymous';
+        db.ref(`posts/${postId}/comments`).push({
+            author: author,
+            text: commentText,
+            timestamp: Date.now()
+        }).then(() => {
+            commentInput.value = '';
+        });
+    }
+
+    function voteOnPoll(postId, option) {
+        if (!currentUser) return;
+        const userVoteRef = db.ref(`postVotes/${postId}/${currentUser.uid}`);
+        userVoteRef.once('value').then(snapshot => {
+            if (!snapshot.exists()) {
+                const pollRef = db.ref(`posts/${postId}/poll/${option}`);
+                userVoteRef.set(true);
+                pollRef.transaction(current => (current || 0) + 1);
+            }
+        });
+    }
+
+    let posts = [];
+    db.ref('posts').on('value', snapshot => {
+        const postsObj = snapshot.val() || {};
+        posts = Object.keys(postsObj).map(key => ({ ...postsObj[key], id: key })).reverse();
+        updateStories();
+    });
+
+    function updateStories() {
+      const uniqueAuthors = {};
+      posts.forEach(post => {
+          if (!uniqueAuthors[post.authorId]) {
+              uniqueAuthors[post.authorId] = post;
+          }
+      });
+      storiesEl.innerHTML = '';
+      Object.values(uniqueAuthors).forEach(post => {
+          const storyDiv = document.createElement('div');
+          storyDiv.className = 'story';
+          storyDiv.innerHTML = `
+              <div class="avatar">${(post.author || 'A').charAt(0).toUpperCase()}</div>
+              <small class="story-name">${post.author || 'Anon'}</small>
+          `;
+          storyDiv.addEventListener('click', () => showPost(post));
+          storiesEl.appendChild(storyDiv);
+      });
+    }
+  </script>
+</body>
+</html>
