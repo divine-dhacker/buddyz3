@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Buddyz — Community</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* Simplified CSS: 
+      Removed styles for complex menus, polls, and comments. 
+    */
+    :root {
+      --bg: #0f1113;
+      --card: #121416;
+      --muted: #9aa0a6;
+      --accent: #ff2d2d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: #eee;
+      margin: 0;
+      min-height: 100vh;
+      /* Added padding for the fixed FAB */
+      padding-bottom: 80px; 
+    }
+    .app {
+      max-width: 980px;
+      margin: 20px auto;
+      padding: 16px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+    
+    /* Stories (Post Previews) */
+    .stories {
+      display: flex;
+      flex-wrap: wrap; /* Changed to wrap for a grid-like view */
+      padding: 8px 0;
+      gap: 12px;
+    }
+    .story {
+      width: calc(33.33% - 8px); /* 3 items per row on large screen */
+      min-width: 100px;
+      height: 130px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .story:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .story .avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: var(--accent); /* Simple color for the avatar */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      font-weight: 700;
+    }
+    .story .story-name {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 100%;
+    }
+    @media(max-width: 600px) {
+        .story {
+            width: calc(50% - 6px); /* 2 items per row on small screen */
+        }
+    }
+    
+    /* Post Modal (Full-Screen View) */
+    .post-modal, .composer-page {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      display: none;
+      z-index: 100;
+      animation: fadeIn 0.3s ease-in-out;
+      overflow-y: auto; /* Allow scrolling */
+    }
+    .post-modal.open, .composer-page.open {
+      display: block;
+    }
+
+    .page-content {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .post-content .post-media {
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+    .post-content .post-text {
+      font-size: 18px;
+      line-height: 1.5;
+      margin-top: 20px;
+    }
+    
+    /* Composer (New Page Feel) */
+    .composer-page textarea, .composer-page input[type="text"] {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #eee;
+      padding: 12px;
+      border-radius: 8px;
+      resize: none;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+    .composer-page textarea {
+        height: 150px;
+    }
+    .composer-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Floating Action Button (FAB) */
+    #fab {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        font-size: 24px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s;
+        z-index: 50;
+    }
+    #fab:active {
+        transform: scale(0.95);
+    }
+
+    /* Utility */
+    .btn {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .small {
+        font-size: 12px;
+        color: var(--muted);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Buddyz — Community</h1>
+    </header>
+    <section class="stories" id="stories"></section>
+  </div>
+  
+  <button id="fab"><i class="fas fa-plus"></i></button>
+
+  <div class="post-modal" id="postModal">
+    <div class="page-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="avatar" id="postAvatar" style="width:40px;height:40px;font-size:18px;"></div>
+                <div>
+                    <div style="font-weight:600;" id="postAuthor"></div>
+                    <div class="small" id="postTimestamp"></div>
+                </div>
+            </div>
+            <button class="btn" style="background:transparent;color:#eee;" id="closePostModal"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="mainPostContent"></div>
+    </div>
+  </div>
+
+  <div class="composer-page" id="composerPage">
+    <div class="page-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h2 style="margin:0;">Create New Post</h2>
+            <button class="btn" style="background:transparent;color:#eee;" id="closeComposerPage"><i class="fas fa-arrow-left"></i> Back</button>
+        </div>
+        <input type="text" id="authorName" placeholder="Your Name" required>
+        <textarea id="caption" placeholder="Say something..."></textarea>
+        
+        <div class="composer-actions">
+            <label class="btn" style="background:rgba(255,255,255,0.1);"><i class="fas fa-image"></i> Add Image
+                <input type="file" id="imageInput" accept="image/*" style="display:none;">
+            </label>
+            <div class="small" id="uploaderStatus"></div>
+            <button class="btn" id="submitPost"><i class="fas fa-paper-plane"></i> Post</button>
+        </div>
+        
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script>
+    // ... (Firebase Config and Setup remains the same)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAVR8OxIwbMkasKfjTVQOpi69Ikw6LraSo",
+      authDomain: "buddy-ea6cd.firebaseapp.com",
+      databaseURL: "https://buddy-ea6cd-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "buddy-ea6cd",
+      storageBucket: "buddy-ea6cd.appspot.com",
+      messagingSenderId: "947901635950",
+      appId: "1:947901635950:web:dd11c3a278eb18768e357f"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const storage = firebase.storage();
+    let currentUser = null;
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        updateStories();
+        startCleanupTimer(); // Start the 48hr cleanup when authenticated
+      } else {
+        firebase.auth().signInAnonymously().catch(err => console.error("Auth error:", err));
+      }
+    });
+
+    // DOM Elements
+    const storiesEl = document.getElementById('stories');
+    const fab = document.getElementById('fab');
+    const composerPage = document.getElementById('composerPage');
+    const closeComposerPageBtn = document.getElementById('closeComposerPage');
+    const authorNameInput = document.getElementById('authorName');
+    const caption = document.getElementById('caption');
+    const imageInput = document.getElementById('imageInput');
+    const submitPost = document.getElementById('submitPost');
+    const uploaderStatus = document.getElementById('uploaderStatus');
+    const postModal = document.getElementById('postModal');
+    const mainPostContent = document.getElementById('mainPostContent');
+    const postAuthorEl = document.getElementById('postAuthor');
+    const postTimestampEl = document.getElementById('postTimestamp');
+    const postAvatarEl = document.getElementById('postAvatar');
+    const closePostModalBtn = document.getElementById('closePostModal');
+
+    let currentPostId = null;
+
+    // --- Interaction Logic ---
+    fab.addEventListener('click', () => composerPage.classList.add('open'));
+    closeComposerPageBtn.addEventListener('click', () => composerPage.classList.remove('open'));
+    closePostModalBtn.addEventListener('click', () => postModal.classList.remove('open'));
+    
+    let selectedImageFile = null;
+    imageInput.addEventListener('change', (e) => {
+      selectedImageFile = e.target.files[0];
+      uploaderStatus.textContent = selectedImageFile ? `Image selected: ${selectedImageFile.name}` : '';
+    });
+
+    submitPost.addEventListener('click', async () => {
+        const author = authorNameInput.value.trim();
+        const text = caption.value.trim();
+        if (!author) {
+            alert("Please enter your name!");
+            return;
+        }
+        if (!text && !selectedImageFile) {
+            alert("Please add a caption or an image!");
+            return;
+        }
+
+        const uid = currentUser ? currentUser.uid : 'anon';
+        const post = {
+            author: author,
+            authorId: uid,
+            caption: text || '',
+            timestamp: Date.now(),
+            expiresAt: Date.now() + (48 * 60 * 60 * 1000) // 48 hours in milliseconds
+        };
+
+        if (selectedImageFile) {
+            post.type = 'image';
+            uploaderStatus.textContent = `Uploading image...`;
+            const path = `posts_images/${uid}_${Date.now()}_${selectedImageFile.name}`;
+            const snap = await storage.ref(path).put(selectedImageFile);
+            post.content = await snap.ref.getDownloadURL();
+            uploaderStatus.textContent = 'Upload complete.';
+        } else {
+            post.type = 'text';
+        }
+
+        await db.ref('posts').push(post);
+        // Reset and close composer
+        composerPage.classList.remove('open');
+        authorNameInput.value = '';
+        caption.value = '';
+        imageInput.value = '';
+        selectedImageFile = null;
+        uploaderStatus.textContent = '';
+    });
+
+    // --- Utility Functions ---
+
+    function timeAgo(ts) {
+        const seconds = Math.floor((Date.now() - ts) / 1000);
+        if (seconds < 60) return `${seconds}s ago`;
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        return `${days}d ago`;
+    }
+
+    function showPost(post) {
+        currentPostId = post.id;
+        postAuthorEl.textContent = post.author || 'Anonymous';
+        postTimestampEl.textContent = timeAgo(post.timestamp);
+        postAvatarEl.textContent = (post.author || 'A').charAt(0).toUpperCase();
+        
+        mainPostContent.innerHTML = '';
+        let contentHtml = '';
+        if (post.type === 'image' && post.content) {
+            contentHtml += `<img class="post-media" src="${post.content}" alt="Post image">`;
+        }
+        if (post.caption) {
+            contentHtml += `<p class="post-text">${post.caption}</p>`;
+        }
+        mainPostContent.innerHTML = contentHtml;
+        
+        postModal.classList.add('open');
+    }
+
+    let posts = [];
+    db.ref('posts').on('value', snapshot => {
+        const postsObj = snapshot.val() || {};
+        // Filter out expired posts (optional, as cleanup will delete them)
+        const now = Date.now();
+        posts = Object.keys(postsObj)
+            .map(key => ({ ...postsObj[key], id: key }))
+            .filter(post => post.expiresAt > now) 
+            .reverse();
+        updateStories();
+    });
+
+    function updateStories() {
+        storiesEl.innerHTML = '';
+        posts.forEach(post => {
+            const storyDiv = document.createElement('div');
+            storyDiv.className = 'story';
+            
+            // Show image preview if available, otherwise show initials
+            let content;
+            if (post.type === 'image' && post.content) {
+                // Use a background image for a nice preview effect
+                storyDiv.style.backgroundImage = `url(${post.content})`;
+                storyDiv.style.backgroundSize = 'cover';
+                storyDiv.style.backgroundPosition = 'center';
+                storyDiv.style.color = 'transparent'; // Hide default text
+                storyDiv.style.position = 'relative';
+                storyDiv.style.justifyContent = 'flex-end'; // Move name to bottom
+                content = `
+                    <div style="position:absolute; inset:0; background:rgba(0,0,0,0.4); border-radius:12px;"></div>
+                    <div class="avatar" style="position:relative; z-index:1;">${(post.author || 'A').charAt(0).toUpperCase()}</div>
+                    <small class="story-name" style="color:#fff; z-index:1;">${post.author || 'Anon'}</small>
+                `;
+            } else {
+                content = `
+                    <div class="avatar">${(post.author || 'A').charAt(0).toUpperCase()}</div>
+                    <small class="story-name">${post.author || 'Anon'}</small>
+                `;
+            }
+
+            storyDiv.innerHTML = content;
+            storyDiv.addEventListener('click', () => showPost(post));
+            storiesEl.appendChild(storyDiv);
+        });
+    }
+
+    // --- 48-Hour Cleanup Logic (MOST IMPORTANT) ---
+    function startCleanupTimer() {
+        // Run cleanup every hour (or set a shorter interval for testing)
+        setInterval(cleanupExpiredPosts, 60 * 60 * 1000); 
+        cleanupExpiredPosts(); // Run immediately on load
+    }
+
+    async function cleanupExpiredPosts() {
+        const now = Date.now();
+        console.log(`[Cleanup] Running cleanup at ${new Date(now).toLocaleTimeString()}`);
+        
+        // Query posts that have expired (expiresAt is less than the current time)
+        const expiredPostsSnapshot = await db.ref('posts')
+            .orderByChild('expiresAt')
+            .endAt(now)
+            .once('value');
+
+        expiredPostsSnapshot.forEach(async (childSnapshot) => {
+            const postId = childSnapshot.key;
+            const post = childSnapshot.val();
+
+            console.log(`[Cleanup] Deleting expired post: ${postId} by ${post.author}`);
+
+            // 1. Delete associated image from Storage (if it exists)
+            if (post.type === 'image' && post.content) {
+                try {
+                    // This is a simplified way to get the path, 
+                    // a robust app should save the full storage path.
+                    // For this basic setup, it often works if the URL format is simple.
+                    const url = new URL(post.content);
+                    const path = decodeURIComponent(url.pathname.split('/o/')[1].split('?')[0]);
+                    await storage.ref(path).delete();
+                    console.log(`[Cleanup] Deleted image for post ${postId}`);
+                } catch (error) {
+                    // Ignore errors if file is not found/path is wrong
+                    console.warn(`[Cleanup] Could not delete image for ${postId}:`, error.message);
+                }
+            }
+
+            // 2. Delete the post from the Database
+            await db.ref(`posts/${postId}`).remove();
+        });
+    }
+
+  </script>
+</body>
+</html>
